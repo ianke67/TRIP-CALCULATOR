@@ -10,937 +10,586 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="旅遊記帳">
   <link rel="apple-touch-icon" href="icon-192.png">
-
-  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
   <style>
-    /* ===== CSS VARIABLES ===== */
-    :root {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: rgba(0,0,0,0.08);
-      --border-md: rgba(0,0,0,0.15);
-      --input-bg: #f8fafc;
-      --primary: #534AB7;
-      --primary-bg: #EEEDFE;
-      --primary-border: #AFA9EC;
-      --danger: #E24B4A;
-      --danger-bg: #FCEBEB;
-      --danger-border: #F09595;
-      --success-bg: #E1F5EE;
-      --success-text: #0F6E56;
-      --nav-bg: #ffffff;
-      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    :root{
+      --bg:#f1f5f9;--card:#ffffff;--text:#1e293b;--muted:#64748b;
+      --border:rgba(0,0,0,0.08);--border-md:rgba(0,0,0,0.15);--input-bg:#f8fafc;
+      --primary:#534AB7;--primary-bg:#EEEDFE;--primary-border:#AFA9EC;
+      --danger:#E24B4A;--danger-bg:#FCEBEB;--danger-border:#F09595;
+      --success-bg:#E1F5EE;--success-text:#0F6E56;
+      --shadow:0 1px 3px rgba(0,0,0,0.08);
     }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8;
-        --border: rgba(255,255,255,0.07); --border-md: rgba(255,255,255,0.14);
-        --input-bg: #0f172a; --primary: #7C74D4; --primary-bg: #1e1b4b;
-        --primary-border: #4338ca; --danger: #f87171; --danger-bg: #450a0a;
-        --danger-border: #7f1d1d; --success-bg: #064e3b; --success-text: #6ee7b7;
-        --nav-bg: #1e293b; --shadow: 0 1px 3px rgba(0,0,0,0.4);
+    @media(prefers-color-scheme:dark){
+      :root:not([data-theme="light"]){
+        --bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;
+        --border:rgba(255,255,255,0.07);--border-md:rgba(255,255,255,0.14);
+        --input-bg:#0f172a;--primary:#7C74D4;--primary-bg:#1e1b4b;--primary-border:#4338ca;
+        --danger:#f87171;--danger-bg:#450a0a;--danger-border:#7f1d1d;
+        --success-bg:#064e3b;--success-text:#6ee7b7;--shadow:0 1px 3px rgba(0,0,0,0.4);
       }
     }
-    [data-theme="dark"] {
-      --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --muted: #94a3b8;
-      --border: rgba(255,255,255,0.07); --border-md: rgba(255,255,255,0.14);
-      --input-bg: #0f172a; --primary: #7C74D4; --primary-bg: #1e1b4b;
-      --primary-border: #4338ca; --danger: #f87171; --danger-bg: #450a0a;
-      --danger-border: #7f1d1d; --success-bg: #064e3b; --success-text: #6ee7b7;
-      --nav-bg: #1e293b; --shadow: 0 1px 3px rgba(0,0,0,0.4);
+    [data-theme="dark"]{
+      --bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--muted:#94a3b8;
+      --border:rgba(255,255,255,0.07);--border-md:rgba(255,255,255,0.14);
+      --input-bg:#0f172a;--primary:#7C74D4;--primary-bg:#1e1b4b;--primary-border:#4338ca;
+      --danger:#f87171;--danger-bg:#450a0a;--danger-border:#7f1d1d;
+      --success-bg:#064e3b;--success-text:#6ee7b7;--shadow:0 1px 3px rgba(0,0,0,0.4);
     }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html{height:100%;}
+    body{min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overscroll-behavior:none;transition:background 0.2s,color 0.2s;}
+    input,select,button,textarea{font-family:inherit;}
 
-    /* ===== RESET & BASE ===== */
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html { height: 100%; }
-    body {
-      min-height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-      font-size: 15px;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      overscroll-behavior: none;
-      transition: background 0.2s, color 0.2s;
-    }
-    input, select, button, textarea { font-family: inherit; }
+    #root{max-width:480px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh;}
+    #header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);}
+    #app{flex:1;overflow-y:auto;padding:14px 14px calc(24px + env(safe-area-inset-bottom));}
 
-    /* ===== LAYOUT ===== */
-    #root { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; min-height: 100dvh; }
-    #header {
-      position: sticky; top: 0; z-index: 20;
-      background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
-      box-shadow: var(--shadow);
-    }
-    #app { flex: 1; overflow-y: auto; padding: 14px 14px 80px; }
-    #nav {
-      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: 480px; z-index: 20;
-      background: var(--nav-bg); border-top: 1px solid var(--border);
-      display: flex; box-shadow: 0 -1px 8px rgba(0,0,0,0.06);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
+    /* Drawer */
+    #drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;display:none;}
+    #drawer{position:fixed;top:0;left:0;bottom:0;width:76%;max-width:280px;background:var(--card);z-index:51;transform:translateX(-100%);transition:transform 0.26s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;box-shadow:6px 0 28px rgba(0,0,0,0.18);}
+    #drawer.open{transform:translateX(0);}
+    .dnav{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:12px;background:none;border:none;color:var(--text);font-size:15px;cursor:pointer;text-align:left;touch-action:manipulation;transition:background 0.15s;margin-bottom:2px;}
+    .dnav svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    .dnav:active{background:var(--primary-bg);}
+    .dnav.on{background:var(--primary-bg);color:var(--primary);font-weight:600;}
 
-    /* ===== COMPONENTS ===== */
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px; margin-bottom: 10px;
-      box-shadow: var(--shadow);
-    }
-    .row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
-    .two { display: flex; gap: 8px; }
-    .muted { color: var(--muted); font-size: 13px; }
-    .label { color: var(--muted); font-size: 12px; margin-bottom: 5px; }
-
-    /* Buttons */
-    .pbtn {
-      background: var(--primary); color: white; border: none;
-      border-radius: 12px; padding: 13px 18px; font-size: 15px; font-weight: 600;
-      cursor: pointer; touch-action: manipulation;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .pbtn:active { opacity: 0.85; transform: scale(0.98); }
-    .gbtn {
-      background: none; border: 1px solid var(--border-md); color: var(--muted);
-      border-radius: 12px; padding: 13px 16px; font-size: 14px;
-      cursor: pointer; touch-action: manipulation;
-    }
-    .gbtn:active { opacity: 0.7; }
-    .ibtn { background: none; border: none; color: var(--muted); padding: 6px; font-size: 20px; cursor: pointer; line-height: 1; touch-action: manipulation; }
-
-    .pill {
-      background: none; border: 1px solid var(--border-md);
-      border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--muted);
-      cursor: pointer; touch-action: manipulation; transition: all 0.15s;
-    }
-    .pill.on { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); font-weight: 600; }
-
-    .mbtn {
-      background: none; border: 1px solid var(--border-md);
-      border-radius: 12px; padding: 11px 8px; font-size: 13px; color: var(--muted);
-      cursor: pointer; touch-action: manipulation; flex: 1; transition: all 0.15s;
-    }
-    .mbtn.on { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); font-weight: 600; }
-
-    /* Tab nav */
-    .tnbtn {
-      background: none; border: none; border-top: 2.5px solid transparent;
-      padding: 10px 0 8px; font-size: 11px; font-weight: 500;
-      color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px;
-      flex: 1; cursor: pointer; touch-action: manipulation; transition: color 0.15s;
-    }
-    .tnbtn.on { color: var(--primary); border-top-color: var(--primary); }
-    .tnbtn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-    /* Toggle */
-    .tgl { width: 44px; height: 25px; border-radius: 13px; background: var(--border-md); cursor: pointer; position: relative; flex-shrink: 0; border: none; transition: background 0.2s; touch-action: manipulation; }
-    .tgl.on { background: var(--primary); }
-    .tgl::after { content: ''; position: absolute; top: 2px; left: 2px; width: 21px; height: 21px; border-radius: 50%; background: white; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-    .tgl.on::after { left: 21px; }
-
-    /* Inputs */
-    .inp {
-      background: var(--input-bg); border: 1px solid var(--border-md);
-      border-radius: 10px; color: var(--text);
-      padding: 10px 13px; font-size: 15px; width: 100%; outline: none;
-      transition: border-color 0.15s;
-    }
-    .inp:focus { border-color: var(--primary); }
-    .sel {
-      background: var(--input-bg); border: 1px solid var(--border-md);
-      border-radius: 10px; color: var(--text);
-      padding: 10px 10px; font-size: 14px; outline: none;
-      cursor: pointer;
-    }
-    .sel:focus { border-color: var(--primary); }
-
-    /* Amount display */
-    .amt-box {
-      background: var(--input-bg); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px 16px;
-      display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px;
-    }
-
-    /* Numpad */
-    .numpad { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 10px; }
-    .nk {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 17px 8px; font-size: 21px; font-weight: 500;
-      color: var(--text); cursor: pointer; touch-action: manipulation; user-select: none;
-      transition: background 0.1s, transform 0.08s; line-height: 1;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-    }
-    .nk:active { background: var(--primary-bg); transform: scale(0.96); }
-    .nk.del { color: var(--danger); }
-    .nk.del:active { background: var(--danger-bg); }
-
-    /* Result box */
-    .res { background: var(--primary-bg); border: 1px solid var(--primary-border); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
-    .warn { background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: 12px; padding: 13px; margin-top: 8px; font-size: 13px; color: var(--danger); }
-
-    /* Records */
-    .ri { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
-    .ric { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .ric svg { width: 20px; height: 20px; fill: none; stroke: var(--primary); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .empty { text-align: center; padding: 44px 0; color: var(--muted); }
-    .empty svg { width: 48px; height: 48px; margin: 0 auto 12px; display: block; opacity: 0.4; fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-
-    /* Swap button */
-    .swap-wrap { display: flex; justify-content: center; margin: 4px 0; }
-    .swap-btn {
-      background: var(--card); border: 1px solid var(--border-md); border-radius: 50%;
-      width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-      color: var(--primary); cursor: pointer; touch-action: manipulation;
-    }
-    .swap-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .swap-btn:active { background: var(--primary-bg); }
-
-    /* Auth banner */
-    .auth-banner {
-      background: var(--primary-bg); border: 1px solid var(--primary-border);
-      border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-
-    /* Settings sheet */
-    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 40; display: flex; align-items: flex-end; }
-    .sheet { background: var(--card); border-radius: 20px 20px 0 0; padding: 20px 16px; width: 100%; max-height: 80dvh; overflow-y: auto; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-    .sheet-handle { width: 36px; height: 4px; background: var(--border-md); border-radius: 2px; margin: 0 auto 16px; }
-
-    /* Stats summary */
-    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-    .stat-label { font-size: 13px; color: var(--muted); }
-    .stat-val { font-size: 17px; font-weight: 700; }
-    .stat-val.saved { color: var(--success-text); }
-
-    /* Records header toggle */
-    .recs-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin: 4px 0 10px; cursor: pointer;
-    }
+    /* Components */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
+    .row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+    .two{display:flex;gap:8px;}
+    .muted{color:var(--muted);font-size:13px;}
+    .label{color:var(--muted);font-size:12px;margin-bottom:5px;}
+    .pbtn{background:var(--primary);color:white;border:none;border-radius:12px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:opacity 0.15s,transform 0.1s;}
+    .pbtn:active{opacity:0.85;transform:scale(0.98);}
+    .gbtn{background:none;border:1px solid var(--border-md);color:var(--muted);border-radius:12px;padding:13px 16px;font-size:14px;cursor:pointer;touch-action:manipulation;}
+    .gbtn:active{opacity:0.7;}
+    .ibtn{background:none;border:none;color:var(--muted);padding:6px;font-size:20px;cursor:pointer;line-height:1;touch-action:manipulation;}
+    .pill{background:none;border:1px solid var(--border-md);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;transition:all 0.15s;}
+    .pill.on{background:var(--primary-bg);border-color:var(--primary);color:var(--primary);font-weight:600;}
+    .mbtn{background:none;border:1px solid var(--border-md);border-radius:12px;padding:11px 8px;font-size:13px;color:var(--muted);cursor:pointer;touch-action:manipulation;flex:1;transition:all 0.15s;}
+    .mbtn.on{border-color:var(--primary);background:var(--primary-bg);color:var(--primary);font-weight:600;}
+    .tgl{width:44px;height:25px;border-radius:13px;background:var(--border-md);cursor:pointer;position:relative;flex-shrink:0;border:none;transition:background 0.2s;touch-action:manipulation;}
+    .tgl.on{background:var(--primary);}
+    .tgl::after{content:'';position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:white;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+    .tgl.on::after{left:21px;}
+    .inp{background:var(--input-bg);border:1px solid var(--border-md);border-radius:10px;color:var(--text);padding:10px 13px;font-size:15px;width:100%;outline:none;transition:border-color 0.15s;}
+    .inp:focus{border-color:var(--primary);}
+    .sel{background:var(--input-bg);border:1px solid var(--border-md);border-radius:10px;color:var(--text);padding:10px 10px;font-size:14px;outline:none;cursor:pointer;}
+    .sel:focus{border-color:var(--primary);}
+    .amt-box{background:var(--input-bg);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;}
+    .numpad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;}
+    .nk{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:17px 8px;font-size:21px;font-weight:500;color:var(--text);cursor:pointer;touch-action:manipulation;user-select:none;transition:background 0.1s,transform 0.08s;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+    .nk:active{background:var(--primary-bg);transform:scale(0.96);}
+    .nk.del{color:var(--danger);}
+    .nk.del:active{background:var(--danger-bg);}
+    .res{background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:14px;padding:14px;margin-bottom:10px;}
+    .warn{background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:12px;padding:13px;margin-top:8px;font-size:13px;color:var(--danger);}
+    .ri{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+    .ric{width:40px;height:40px;border-radius:12px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .ric svg{width:20px;height:20px;fill:none;stroke:var(--primary);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    .empty{text-align:center;padding:44px 0;color:var(--muted);}
+    .empty svg{width:48px;height:48px;margin:0 auto 12px;display:block;opacity:0.4;fill:none;stroke:var(--muted);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+    .swap-wrap{display:flex;justify-content:center;margin:4px 0;}
+    .swap-btn{background:var(--card);border:1px solid var(--border-md);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--primary);cursor:pointer;touch-action:manipulation;}
+    .swap-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .swap-btn:active{background:var(--primary-bg);}
+    .auth-banner{background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:40;display:flex;align-items:flex-end;}
+    .sheet{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-height:80dvh;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom));}
+    .sheet-handle{width:36px;height:4px;background:var(--border-md);border-radius:2px;margin:0 auto 16px;}
+    .recs-header{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px;cursor:pointer;padding:4px 0;}
+    .refund-box{background:var(--success-bg);border:1px solid rgba(15,110,86,0.2);border-radius:12px;padding:12px 14px;margin-top:10px;margin-bottom:4px;}
   </style>
 </head>
 <body>
+
 <div id="root">
   <div id="header">
-    <div style="display:flex;align-items:center;gap:8px">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 2c-2-2-4-2-5.5-.5L10 5 1.8 6.2c-.5.1-.9.5-1 1l-.3 1.3c-.1.7.3 1.3 1 1.5L7 11.5 5.5 16 4 20l4-1.5L12.5 17l1.5 5.5 1.3.3c.7.2 1.4-.3 1.5-1l.2-1.3a1 1 0 0 0-.2-.8z"/></svg>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="ibtn" onclick="openDrawer()" aria-label="功能選單" style="padding:4px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 2c-2-2-4-2-5.5-.5L10 5 1.8 6.2c-.5.1-.9.5-1 1l-.3 1.3c-.1.7.3 1.3 1 1.5L7 11.5 5.5 16 4 20l4-1.5L12.5 17l1.5 5.5 1.3.3c.7.2 1.4-.3 1.5-1l.2-1.3a1 1 0 0 0-.2-.8z"/></svg>
       <span style="font-weight:700;font-size:17px">旅遊記帳</span>
-      <span style="font-size:10px;color:var(--muted);background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:1px 6px">v1.0.1</span>
     </div>
-    <button class="ibtn" id="settings-btn" onclick="openSettings()" aria-label="設定">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
+    <div style="display:flex;align-items:center;gap:4px">
+      <span style="font-size:10px;color:var(--muted);background:var(--input-bg);border:1px solid var(--border);border-radius:6px;padding:1px 6px">v1.0.2</span>
+      <button class="ibtn" onclick="openSettings()" aria-label="設定">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
   </div>
-
   <div id="app"></div>
+</div>
 
-  <div id="nav">
-    <button class="tnbtn" id="nav-tools" onclick="sv('tab','tools')">
-      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      退稅/匯率
+<!-- Drawer -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div style="padding:20px 16px 14px;border-bottom:1px solid var(--border)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 2c-2-2-4-2-5.5-.5L10 5 1.8 6.2c-.5.1-.9.5-1 1l-.3 1.3c-.1.7.3 1.3 1 1.5L7 11.5 5.5 16 4 20l4-1.5L12.5 17l1.5 5.5 1.3.3c.7.2 1.4-.3 1.5-1l.2-1.3a1 1 0 0 0-.2-.8z"/></svg>
+      <span style="font-weight:700;font-size:16px">旅遊記帳</span>
+    </div>
+    <span style="font-size:11px;color:var(--muted)">v1.0.2</span>
+  </div>
+  <nav style="flex:1;padding:10px 8px;overflow-y:auto">
+    <div style="font-size:11px;color:var(--muted);padding:6px 14px 4px;letter-spacing:0.05em;font-weight:600;text-transform:uppercase">計算工具</div>
+    <button class="dnav" id="di-tax" onclick="navTo('tax')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      退稅計算機
     </button>
-    <button class="tnbtn" id="nav-acc" onclick="sv('tab','acc')">
+    <button class="dnav" id="di-rate" onclick="navTo('rate')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      匯率換算
+    </button>
+    <div style="font-size:11px;color:var(--muted);padding:10px 14px 4px;letter-spacing:0.05em;font-weight:600;text-transform:uppercase">記錄</div>
+    <button class="dnav" id="di-acc" onclick="navTo('acc')">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      記帳
+      記帳清單
+    </button>
+  </nav>
+  <div style="padding:8px;border-top:1px solid var(--border);padding-bottom:calc(10px + env(safe-area-inset-bottom))">
+    <button class="dnav" onclick="closeDrawer();setTimeout(openSettings,150)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      設定
     </button>
   </div>
 </div>
 
 <!-- Settings Sheet -->
 <div id="settings-overlay" style="display:none" class="sheet-overlay" onclick="if(event.target===this)closeSettings()">
-  <div class="sheet" id="settings-sheet">
+  <div class="sheet">
     <div class="sheet-handle"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
       <span style="font-weight:700;font-size:16px">設定</span>
-      <button class="ibtn" onclick="closeSettings()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <button class="ibtn" onclick="closeSettings()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-
-    <!-- Theme -->
     <div class="label" style="margin-bottom:6px">外觀主題</div>
     <div class="two" style="margin-bottom:18px">
       <button id="theme-light" class="mbtn" onclick="setTheme('light')">☀️ 淺色</button>
       <button id="theme-dark" class="mbtn" onclick="setTheme('dark')">🌙 深色</button>
       <button id="theme-sys" class="mbtn on" onclick="setTheme('system')">💻 跟隨</button>
     </div>
-
-    <!-- Firebase -->
     <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:14px">
       <div style="font-weight:600;font-size:14px;margin-bottom:4px">Firebase 跨裝置同步</div>
-      <div class="muted" style="font-size:13px;margin-bottom:12px">填入 Firebase 設定後重新整理即可啟用。<br>未填寫時資料只存在本機。</div>
+      <div class="muted" style="font-size:13px;margin-bottom:12px">填入後重新整理即可啟用。未填寫時資料只存本機。</div>
       <div id="firebase-status" style="margin-bottom:10px"></div>
-      <div class="label">API Key</div>
-      <input class="inp" id="fb-apiKey" placeholder="AIzaSy..." style="margin-bottom:8px" oninput="fbDirty=true">
-      <div class="label">Auth Domain</div>
-      <input class="inp" id="fb-authDomain" placeholder="your-app.firebaseapp.com" style="margin-bottom:8px" oninput="fbDirty=true">
-      <div class="label">Project ID</div>
-      <input class="inp" id="fb-projectId" placeholder="your-app" style="margin-bottom:8px" oninput="fbDirty=true">
-      <div class="label">App ID</div>
-      <input class="inp" id="fb-appId" placeholder="1:123456:web:abcdef" style="margin-bottom:12px" oninput="fbDirty=true">
+      <div class="label">API Key</div><input class="inp" id="fb-apiKey" placeholder="AIzaSy..." style="margin-bottom:8px" oninput="fbDirty=true">
+      <div class="label">Auth Domain</div><input class="inp" id="fb-authDomain" placeholder="your-app.firebaseapp.com" style="margin-bottom:8px" oninput="fbDirty=true">
+      <div class="label">Project ID</div><input class="inp" id="fb-projectId" placeholder="your-app" style="margin-bottom:8px" oninput="fbDirty=true">
+      <div class="label">App ID</div><input class="inp" id="fb-appId" placeholder="1:123456:web:abcdef" style="margin-bottom:12px" oninput="fbDirty=true">
       <button class="pbtn" style="width:100%" onclick="saveFbConfig()">儲存 Firebase 設定</button>
     </div>
-
-    <!-- Auth -->
     <div id="auth-section" style="border-top:1px solid var(--border);padding-top:16px;display:none">
       <div id="auth-content"></div>
-      <div class="muted" style="font-size:12px;margin-top:10px;line-height:1.6">
-        ⚠ 首次登入請確認 Firebase Console → Authentication → Settings → 授權網域，已加入你的部署網址（如 GitHub Pages 網址）。<br>
-        登入後頁面會短暫跳轉，這是正常現象。
-      </div>
+      <div class="muted" style="font-size:12px;margin-top:10px;line-height:1.6">⚠ Firebase Console → Authentication → Settings → 授權網域，需加入你的 GitHub Pages 網址。<br>登入時頁面會短暫跳轉，這是正常現象。</div>
     </div>
   </div>
 </div>
 
 <script>
-// ================================================================
-//  ★ FIREBASE CONFIG — 填入你的 Firebase 設定
-// ================================================================
-const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
-};
-// ================================================================
+const FIREBASE_CONFIG={apiKey:"",authDomain:"",projectId:"",storageBucket:"",messagingSenderId:"",appId:""};
 
-// ===== CONSTANTS =====
-const CATS = [
-  { id:'food',   l:'餐飲', path:'M3 11l19-9-9 19-2-8-8-2z' },
-  { id:'shop',   l:'購物', path:'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' },
-  { id:'move',   l:'交通', path:'M3 17l3-10h12l3 10H3zM8 17v2M16 17v2' },
-  { id:'hotel',  l:'住宿', path:'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' },
-  { id:'fun',    l:'娛樂', path:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01' },
-  { id:'beauty', l:'美妝', path:'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z' },
-  { id:'other',  l:'其他', path:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' },
+const CATS=[
+  {id:'food',  l:'餐飲', path:'M3 11l19-9-9 19-2-8-8-2z'},
+  {id:'shop',  l:'購物', path:'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0'},
+  {id:'move',  l:'交通', path:'M3 17l3-10h12l3 10H3zM8 17v2M16 17v2'},
+  {id:'hotel', l:'住宿', path:'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'},
+  {id:'fun',   l:'娛樂', path:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01'},
+  {id:'beauty',l:'美妝', path:'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'},
+  {id:'other', l:'其他', path:'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'},
 ];
-const CL = ['TWD','JPY','KRW','CNY','EUR','USD'];
-const CN = { TWD:'台幣', JPY:'日圓', KRW:'韓元', CNY:'人民幣', EUR:'歐元', USD:'美元' };
-const FB_RATES = { TWD:1, JPY:4.55, KRW:45.5, CNY:0.222, EUR:0.029, USD:0.031 };
+const CL=['TWD','JPY','KRW','CNY','EUR','USD'];
+const CN={TWD:'台幣',JPY:'日圓',KRW:'韓元',CNY:'人民幣',EUR:'歐元',USD:'美元'};
+const FB_RATES={TWD:1,JPY:4.55,KRW:45.5,CNY:0.222,EUR:0.029,USD:0.031};
 
-// ===== STATE =====
-let S = {
-  tab: 'tools', tm: 'tax',
-  taxM: 'inc', feeOn: true, feeR: '3.5', taxA: '0',
-  // 「加入記帳」from tax calculator
-  showAcc: false, accTrip: '', accName: '', accOrigAmt: 0, accRefundAmt: 0,
-  fC: 'JPY', tC: 'TWD', fA: '10000',
-  rates: null, rTime: null, rBusy: false, rOK: false,
-  trips: [], trip: null,
-  recs: [], showF: false, showTF: false, nTrip: '',
-  recsOpen: true,   // collapsible records list
-  f: { date: today(), cat: 'shop', name: '', amt: '0', curr: 'JPY' },
-  user: null, fbReady: false, authLoading: false,
+let S={
+  tab:'tools',tm:'tax',
+  taxM:'inc',feeOn:true,feeR:'3.5',taxA:'0',
+  showAcc:false,accTrip:'',accName:'',accOrigAmt:0,accRefundAmt:0,
+  fC:'JPY',tC:'TWD',fA:'10000',
+  rates:null,rTime:null,rBusy:false,rOK:false,
+  trips:[],trip:null,
+  recs:[],showF:false,showTF:false,nTrip:'',
+  recsOpen:true,
+  f:{date:today(),cat:'shop',name:'',amt:'0',curr:'JPY',hasRefund:false,refundAmt:'0'},
+  user:null,fbReady:false,authLoading:false,
 };
+let db=null,auth=null,fbUnsub=[],fbDirty=false;
 
-let db = null, auth = null, fbUnsub = [], fbDirty = false;
-
-// ===== UTILS =====
-function today() { return new Date().toISOString().slice(0,10); }
-function uid()   { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
-function catI(id) { return (CATS.find(c=>c.id===id)||CATS[6]).path; }
-function catL(id) { return (CATS.find(c=>c.id===id)||CATS[6]).l; }
-function catSvg(id, size=20) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${catI(id)}"/></svg>`;
-}
-function gr()    { return { ...FB_RATES, ...(S.rates||{}), TWD:1 }; }
-function xrate(f,t) { const r=gr(); return (r[t]||1)/(r[f]||1); }
-function fmt(n,c) {
-  if (isNaN(n)||n===null) return '—';
-  if (c==='JPY'||c==='KRW') return Math.round(n).toLocaleString('zh-TW');
-  return parseFloat(n.toFixed(2)).toLocaleString('zh-TW');
-}
-function nkUpdate(cur, k) {
-  let v = String(cur||'0');
-  if (v.length >= 12 && k !== 'del') return v;
-  if (k==='del') return v.length>1 ? v.slice(0,-1) : '0';
-  if (k==='dot') return v.includes('.') ? v : (v==='0' ? '0.' : v+'.');
-  return v==='0' ? k : v+k;
-}
-function nkT(k) { S.taxA = nkUpdate(S.taxA,k); render(); }
-function nkR(k) { S.fA   = nkUpdate(S.fA,k);   render(); }
-function nkF(k) { S.f.amt = nkUpdate(S.f.amt,k); render(); }
-
-function npHTML(fn) {
-  const keys = ['1','2','3','4','5','6','7','8','9','dot','0','del'];
-  return `<div class="numpad">${keys.map(k => {
-    const lbl = k==='dot' ? '.' : k==='del'
-      ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>`
-      : k;
-    return `<button class="nk${k==='del'?' del':''}" onclick="${fn}('${k}')">${lbl}</button>`;
-  }).join('')}</div>`;
+function today(){return new Date().toISOString().slice(0,10);}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function catI(id){return(CATS.find(c=>c.id===id)||CATS[6]).path;}
+function catL(id){return(CATS.find(c=>c.id===id)||CATS[6]).l;}
+function catSvg(id,size=20){return`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${catI(id)}"/></svg>`;}
+function gr(){return{...FB_RATES,...(S.rates||{}),TWD:1};}
+function xrate(f,t){const r=gr();return(r[t]||1)/(r[f]||1);}
+function fmt(n,c){if(isNaN(n)||n===null)return'—';if(c==='JPY'||c==='KRW')return Math.round(n).toLocaleString('zh-TW');return parseFloat(n.toFixed(2)).toLocaleString('zh-TW');}
+function nkUpdate(cur,k){let v=String(cur||'0');if(v.length>=12&&k!=='del')return v;if(k==='del')return v.length>1?v.slice(0,-1):'0';if(k==='dot')return v.includes('.')?v:(v==='0'?'0.':v+'.');return v==='0'?k:v+k;}
+function nkT(k){S.taxA=nkUpdate(S.taxA,k);render();}
+function nkR(k){S.fA=nkUpdate(S.fA,k);render();}
+function nkF(k){S.f.amt=nkUpdate(S.f.amt,k);if(S.f.hasRefund)S.f.refundAmt=String(calcRefund(S.f.amt));render();}
+function npHTML(fn){
+  const keys=['1','2','3','4','5','6','7','8','9','dot','0','del'];
+  return`<div class="numpad">${keys.map(k=>{const lbl=k==='dot'?'.':k==='del'?`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>`:k;return`<button class="nk${k==='del'?' del':''}" onclick="${fn}('${k}')">${lbl}</button>`;}).join('')}</div>`;
 }
 
-// ===== STORAGE =====
-function lsGet(k, def) {
-  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }
-  catch { return def; }
+function lsGet(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch{return def;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function loadLocal(){
+  S.trips=lsGet('trips',[{id:'default',name:'我的旅行'}]);
+  S.trip=lsGet('activeTrip',S.trips[0]?.id||null);
+  S.recs=lsGet('records',[]);
+  const c=lsGet('rates_cache',null);
+  if(c&&Date.now()-c.ts<3600000){S.rates=c.data;S.rOK=true;S.rTime=c.time;}
 }
-function lsSet(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+function saveLocal(){lsSet('trips',S.trips);lsSet('activeTrip',S.trip);lsSet('records',S.recs);}
+function cacheRates(data){const t=new Date().toLocaleTimeString('zh-TW');lsSet('rates_cache',{ts:Date.now(),data,time:t});S.rates=data;S.rTime=t;S.rOK=true;}
 
-function loadLocal() {
-  S.trips = lsGet('trips', [{ id:'default', name:'我的旅行' }]);
-  S.trip  = lsGet('activeTrip', S.trips[0]?.id || null);
-  S.recs  = lsGet('records', []);
-  const cached = lsGet('rates_cache', null);
-  if (cached && Date.now() - cached.ts < 3600000) { S.rates = cached.data; S.rOK = true; S.rTime = cached.time; }
+function tryInitFirebase(){
+  const cfg=lsGet('fb_config',null)||FIREBASE_CONFIG;
+  if(!cfg.apiKey){loadLocal();render();return;}
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(cfg);else firebase.app();
+    auth=firebase.auth();db=firebase.firestore();
+    S.fbReady=true;S.authLoading=true;
+    auth.getRedirectResult().catch(e=>{if(e.code!=='auth/no-current-user')console.warn('Redirect:',e.code);});
+    auth.onAuthStateChanged(user=>{S.user=user;S.authLoading=false;if(user)loadFirestore(user.uid);else{loadLocal();render();}});
+  }catch(e){console.warn('Firebase init failed:',e.message);loadLocal();render();}
 }
-function saveLocal() {
-  lsSet('trips', S.trips);
-  lsSet('activeTrip', S.trip);
-  lsSet('records', S.recs);
+function loadFirestore(uid){
+  fbUnsub.forEach(u=>u());fbUnsub=[];
+  fbUnsub.push(db.collection(`users/${uid}/trips`).orderBy('createdAt').onSnapshot(snap=>{S.trips=snap.docs.map(d=>({id:d.id,...d.data()}));if(!S.trip||!S.trips.find(t=>t.id===S.trip))S.trip=S.trips[0]?.id||null;render();}));
+  fbUnsub.push(db.collection(`users/${uid}/records`).orderBy('createdAt','desc').onSnapshot(snap=>{S.recs=snap.docs.map(d=>({id:d.id,...d.data()}));render();}));
 }
-function cacheRates(data) {
-  const t = new Date().toLocaleTimeString('zh-TW');
-  lsSet('rates_cache', { ts: Date.now(), data, time: t });
-  S.rates = data; S.rTime = t; S.rOK = true;
-}
+function fsAddTrip(trip){S.trips.push(trip);if(!S.user||!db){saveLocal();return;}db.collection(`users/${S.user.uid}/trips`).doc(trip.id).set({...trip,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+function fsAddRecord(rec){S.recs.unshift(rec);if(!S.user||!db){saveLocal();return;}db.collection(`users/${S.user.uid}/records`).doc(rec.id).set({...rec,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}
+function fsDeleteRecord(id){S.recs=S.recs.filter(r=>r.id!==id);if(!S.user||!db){saveLocal();return;}db.collection(`users/${S.user.uid}/records`).doc(id).delete();}
 
-// ===== FIREBASE — fixed: optimistic updates, no more duplicate adds =====
-function tryInitFirebase() {
-  const cfg = lsGet('fb_config', null) || FIREBASE_CONFIG;
-  if (!cfg.apiKey) { loadLocal(); render(); return; }
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(cfg);
-    else firebase.app();
-    auth = firebase.auth();
-    db   = firebase.firestore();
-    S.fbReady = true;
-    S.authLoading = true;
-
-    // Handle redirect sign-in result (needed after signInWithRedirect)
-    auth.getRedirectResult().catch(e => {
-      if (e.code !== 'auth/no-current-user') console.warn('Redirect result:', e.code);
-    });
-
-    auth.onAuthStateChanged(user => {
-      S.user = user;
-      S.authLoading = false;
-      if (user) loadFirestore(user.uid);
-      else { loadLocal(); render(); }
-    });
-  } catch(e) {
-    console.warn('Firebase init failed, using local:', e.message);
-    loadLocal(); render();
-  }
+async function fetchRates(){
+  if(S.rBusy)return;S.rBusy=true;render();
+  try{const res=await fetch('https://open.er-api.com/v6/latest/TWD');if(!res.ok)throw new Error();const d=await res.json();if(d.rates)cacheRates(d.rates);}
+  catch{S.rOK=false;S.rTime=new Date().toLocaleTimeString('zh-TW');}
+  S.rBusy=false;render();
 }
 
-function loadFirestore(uid) {
-  fbUnsub.forEach(u => u()); fbUnsub = [];
-  fbUnsub.push(
-    db.collection(`users/${uid}/trips`).orderBy('createdAt').onSnapshot(snap => {
-      S.trips = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-      if (!S.trip || !S.trips.find(t=>t.id===S.trip)) S.trip = S.trips[0]?.id || null;
-      render();
-    })
-  );
-  fbUnsub.push(
-    db.collection(`users/${uid}/records`).orderBy('createdAt','desc').onSnapshot(snap => {
-      S.recs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-      render();
-    })
-  );
-}
+function render(){document.getElementById('app').innerHTML=S.tab==='acc'?accHTML():toolsHTML();}
 
-// Unified add/delete — always update local state optimistically, then sync if logged in
-function fsAddTrip(trip) {
-  S.trips.push(trip);
-  if (!S.user || !db) { saveLocal(); return; }
-  db.collection(`users/${S.user.uid}/trips`).doc(trip.id).set({
-    ...trip, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-function fsAddRecord(rec) {
-  S.recs.unshift(rec);
-  if (!S.user || !db) { saveLocal(); return; }
-  db.collection(`users/${S.user.uid}/records`).doc(rec.id).set({
-    ...rec, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-function fsDeleteRecord(id) {
-  S.recs = S.recs.filter(r => r.id !== id);
-  if (!S.user || !db) { saveLocal(); return; }
-  db.collection(`users/${S.user.uid}/records`).doc(id).delete();
-}
-
-// ===== EXCHANGE RATE API =====
-async function fetchRates() {
-  if (S.rBusy) return;
-  S.rBusy = true; render();
-  try {
-    const res = await fetch('https://open.er-api.com/v6/latest/TWD');
-    if (!res.ok) throw new Error('API error');
-    const d = await res.json();
-    if (d.rates) cacheRates(d.rates);
-  } catch {
-    S.rOK = false;
-    S.rTime = new Date().toLocaleTimeString('zh-TW');
-  }
-  S.rBusy = false; render();
-}
-
-// ===== RENDER =====
-function render() {
-  document.getElementById('app').innerHTML = S.tab === 'acc' ? accHTML() : toolsHTML();
-  document.querySelectorAll('.tnbtn').forEach(b => b.classList.remove('on'));
-  document.getElementById('nav-' + S.tab)?.classList.add('on');
-}
-
-function toolsHTML() {
-  return `<div>
+function toolsHTML(){
+  return`<div>
     <div class="two" style="margin-bottom:14px">
       <button class="mbtn${S.tm==='tax'?' on':''}" onclick="sv('tm','tax')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        商品退稅
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>退稅計算機
       </button>
       <button class="mbtn${S.tm==='rate'?' on':''}" onclick="sv('tm','rate')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        匯率換算
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:4px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>匯率換算
       </button>
     </div>
-    ${S.tm==='tax' ? taxHTML() : rateHTML()}
+    ${S.tm==='tax'?taxHTML():rateHTML()}
   </div>`;
 }
 
-function taxHTML() {
-  const amt = parseFloat(S.taxA) || 0;
-  const untaxed = S.taxM==='inc' ? amt/1.1 : amt;
-  const canRef = amt > 0 && untaxed >= 5000;
-  const taxAmt = canRef ? (S.taxM==='inc' ? amt*0.1/1.1 : amt*0.1) : 0;
-  const fR = Math.min(Math.max(parseFloat(S.feeR)||0, 0), 100) / 100;
-  const fee = S.feeOn ? taxAmt*fR : 0;
-  const refund = taxAmt - fee;
-
-  return `
+function taxHTML(){
+  const amt=parseFloat(S.taxA)||0;
+  const untaxed=S.taxM==='inc'?amt/1.1:amt;
+  const canRef=amt>0&&untaxed>=5000;
+  const taxAmt=canRef?(S.taxM==='inc'?amt*0.1/1.1:amt*0.1):0;
+  const fR=Math.min(Math.max(parseFloat(S.feeR)||0,0),100)/100;
+  const fee=S.feeOn?taxAmt*fR:0;
+  const refund=taxAmt-fee;
+  return`
   <div class="two" style="margin-bottom:10px">
     <button class="mbtn${S.taxM==='inc'?' on':''}" onclick="sv('taxM','inc')">含稅（税込）</button>
     <button class="mbtn${S.taxM==='exc'?' on':''}" onclick="sv('taxM','exc')">未稅（税抜）</button>
   </div>
-  <div class="amt-box">
-    <span class="muted" style="font-size:12px">商品金額 · JPY</span>
-    <span style="font-size:32px;font-weight:700;letter-spacing:-1px">${parseFloat(S.taxA||0).toLocaleString('zh-TW')}</span>
-  </div>
+  <div class="amt-box"><span class="muted" style="font-size:12px">商品金額 · JPY</span><span style="font-size:32px;font-weight:700;letter-spacing:-1px">${parseFloat(S.taxA||0).toLocaleString('zh-TW')}</span></div>
   ${npHTML('nkT')}
   <div class="card" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <span style="font-size:14px">扣除手續費</span>
       <div style="display:flex;align-items:center;gap:10px">
-        ${S.feeOn ? `<input class="inp" type="number" value="${S.feeR}" min="0" max="100" step="0.1" style="width:55px;text-align:center;padding:6px 8px;font-size:13px" onchange="S.feeR=this.value;render()"><span class="muted" style="font-size:13px">%</span>` : ''}
-        <button class="tgl${S.feeOn?' on':''}" onclick="tog('feeOn')" aria-label="手續費開關"></button>
+        ${S.feeOn?`<input class="inp" type="number" value="${S.feeR}" min="0" max="100" step="0.1" style="width:55px;text-align:center;padding:6px 8px;font-size:13px" onchange="S.feeR=this.value;render()"><span class="muted" style="font-size:13px">%</span>`:''}
+        <button class="tgl${S.feeOn?' on':''}" onclick="tog('feeOn')"></button>
       </div>
     </div>
   </div>
-  ${amt > 0 ? (canRef ? `
+  ${amt>0?(canRef?`
   <div class="res">
     <div style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px">試算結果</div>
     <div class="row"><span class="muted">消費稅額（10%）</span><span style="font-size:14px">¥${Math.round(taxAmt).toLocaleString('zh-TW')}</span></div>
-    ${S.feeOn ? `<div class="row"><span class="muted">手續費（${S.feeR}%）</span><span style="font-size:14px;color:var(--danger)">-¥${Math.round(fee).toLocaleString('zh-TW')}</span></div>` : ''}
+    ${S.feeOn?`<div class="row"><span class="muted">手續費（${S.feeR}%）</span><span style="font-size:14px;color:var(--danger)">-¥${Math.round(fee).toLocaleString('zh-TW')}</span></div>`:''}
     <div class="row" style="border-top:1px solid var(--primary-border);padding-top:8px;margin-top:4px">
       <span style="font-weight:600">預計退稅</span>
       <span style="font-size:26px;font-weight:700;color:var(--primary)">¥${Math.round(refund).toLocaleString('zh-TW')}</span>
     </div>
   </div>
-  ${S.showAcc ? addAccHTML() : `<button class="pbtn" style="width:100%" onclick="openAddAcc(${Math.round(amt)}, ${Math.round(refund)})">加入記帳？</button>`}
-  ` : `<div class="warn">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    未稅金額 ¥${Math.round(untaxed).toLocaleString('zh-TW')}，未達 ¥5,000 最低退稅門檻
-  </div>`) : ''}`;
+  ${S.showAcc?addAccHTML():`<button class="pbtn" style="width:100%" onclick="openAddAcc(${Math.round(amt)},${Math.round(refund)})">加入記帳？</button>`}
+  `:`<div class="warn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>未稅金額 ¥${Math.round(untaxed).toLocaleString('zh-TW')}，未達 ¥5,000 退稅門檻</div>`):''}`;
 }
 
-// ===== ADD TO ACCOUNTING FROM TAX CALCULATOR =====
-// openAddAcc captures the original purchase amount AND refund at the moment user taps the button
-function openAddAcc(origAmt, refundAmt) {
-  S.showAcc = true;
-  S.accOrigAmt = origAmt;
-  S.accRefundAmt = refundAmt;
-  if (S.trips.length && !S.accTrip) S.accTrip = S.trips[0].id;
-  render();
-}
-
-function addAccHTML() {
-  if (!S.trips.length) return `
-    <div class="card" style="margin-top:8px;text-align:center">
-      <p class="muted" style="margin-bottom:12px">請先在「記帳」頁建立行程</p>
-      <button class="gbtn" style="font-size:13px" onclick="sv('tab','acc')">前往記帳頁</button>
-    </div>`;
-  if (!S.accTrip) S.accTrip = S.trips[0].id;
-  const net = S.accOrigAmt - S.accRefundAmt;
-  return `<div class="card" style="border-color:var(--primary);margin-top:8px">
+function openAddAcc(origAmt,refundAmt){S.showAcc=true;S.accOrigAmt=origAmt;S.accRefundAmt=refundAmt;if(S.trips.length&&!S.accTrip)S.accTrip=S.trips[0].id;render();}
+function addAccHTML(){
+  if(!S.trips.length)return`<div class="card" style="margin-top:8px;text-align:center"><p class="muted" style="margin-bottom:12px">請先在記帳清單建立行程</p><button class="gbtn" style="font-size:13px" onclick="navTo('acc')">前往記帳</button></div>`;
+  if(!S.accTrip)S.accTrip=S.trips[0].id;
+  const net=S.accOrigAmt-S.accRefundAmt;
+  return`<div class="card" style="border-color:var(--primary);margin-top:8px">
     <div style="font-weight:600;font-size:14px;margin-bottom:12px">加入記帳</div>
     <div style="background:var(--input-bg);border-radius:10px;padding:10px 12px;margin-bottom:14px">
-      <div class="row" style="padding:3px 0"><span class="muted" style="font-size:13px">購買金額</span><span style="font-size:14px">¥${S.accOrigAmt.toLocaleString('zh-TW')}</span></div>
-      <div class="row" style="padding:3px 0"><span class="muted" style="font-size:13px">退稅金額</span><span style="font-size:14px;color:var(--success-text)">-¥${S.accRefundAmt.toLocaleString('zh-TW')}</span></div>
+      <div class="row" style="padding:3px 0"><span class="muted" style="font-size:13px">購買金額</span><span>¥${S.accOrigAmt.toLocaleString('zh-TW')}</span></div>
+      <div class="row" style="padding:3px 0"><span class="muted" style="font-size:13px">退稅金額</span><span style="color:var(--success-text)">-¥${S.accRefundAmt.toLocaleString('zh-TW')}</span></div>
       <div style="border-top:1px solid var(--border);margin:6px 0"></div>
       <div class="row" style="padding:3px 0"><span style="font-size:13px;font-weight:600">實際花費</span><span style="font-size:16px;font-weight:700;color:var(--primary)">¥${net.toLocaleString('zh-TW')}</span></div>
     </div>
     <div class="label">選擇行程</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-      ${S.trips.map(t=>`<button class="pill${S.accTrip===t.id?' on':''}" onclick="S.accTrip='${t.id}';render()">${t.name}</button>`).join('')}
-    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">${S.trips.map(t=>`<button class="pill${S.accTrip===t.id?' on':''}" onclick="S.accTrip='${t.id}';render()">${t.name}</button>`).join('')}</div>
     <div class="label">商品說明（選填）</div>
     <input class="inp" type="text" placeholder="例：藥妝購物" value="${S.accName}" oninput="S.accName=this.value" style="margin-bottom:12px">
-    <div class="two">
-      <button class="pbtn" style="flex:1" onclick="saveToAcc()">儲存</button>
-      <button class="gbtn" onclick="tog('showAcc')">取消</button>
-    </div>
+    <div class="two"><button class="pbtn" style="flex:1" onclick="saveToAcc()">儲存</button><button class="gbtn" onclick="tog('showAcc')">取消</button></div>
   </div>`;
 }
-
-// Record saves BOTH original amt and refund — net = amt - refund is used in summary
-function saveToAcc() {
-  const name = S.accName.trim() || '購物退稅';
-  const rec = {
-    id: uid(), tripId: S.accTrip, date: today(),
-    cat: 'shop', name,
-    amt: S.accOrigAmt,
-    refund: S.accRefundAmt,
-    curr: 'JPY'
-  };
-  fsAddRecord(rec);
-  S.showAcc = false; S.accName = ''; render();
+function saveToAcc(){
+  const name=S.accName.trim()||'購物退稅';
+  fsAddRecord({id:uid(),tripId:S.accTrip,date:today(),cat:'shop',name,amt:S.accOrigAmt,refund:S.accRefundAmt,curr:'JPY'});
+  S.showAcc=false;S.accName='';render();
 }
 
-function rateHTML() {
-  const r = xrate(S.fC, S.tC);
-  const fA = parseFloat(S.fA)||0;
-  const tA = fA * r;
-  const rStr = (S.tC==='JPY'||S.tC==='KRW') ? r.toFixed(2) : r.toFixed(4);
-  return `
+function rateHTML(){
+  const r=xrate(S.fC,S.tC),fA=parseFloat(S.fA)||0,tA=fA*r;
+  const rStr=(S.tC==='JPY'||S.tC==='KRW')?r.toFixed(2):r.toFixed(4);
+  return`
   <div class="card" style="margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none">
     <div class="label">從</div>
     <div style="display:flex;gap:8px;align-items:center">
-      <select class="sel" onchange="S.fC=this.value;render()">
-        ${CL.map(c=>`<option value="${c}"${S.fC===c?' selected':''}>${c} · ${CN[c]}</option>`).join('')}
-      </select>
-      <div class="amt-box" style="flex:1;margin:0;padding:10px 14px;border-radius:10px">
-        <span style="font-size:24px;font-weight:700">${parseFloat(S.fA||0).toLocaleString('zh-TW')}</span>
-      </div>
+      <select class="sel" onchange="S.fC=this.value;render()">${CL.map(c=>`<option value="${c}"${S.fC===c?' selected':''}>${c} · ${CN[c]}</option>`).join('')}</select>
+      <div class="amt-box" style="flex:1;margin:0;padding:10px 14px;border-radius:10px"><span style="font-size:24px;font-weight:700">${parseFloat(S.fA||0).toLocaleString('zh-TW')}</span></div>
     </div>
   </div>
-  <div class="swap-wrap">
-    <button class="swap-btn" onclick="swapC()" aria-label="交換幣別">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
-    </button>
-  </div>
+  <div class="swap-wrap"><button class="swap-btn" onclick="swapC()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></button></div>
   <div class="card" style="margin-bottom:10px;border-top-left-radius:0;border-top-right-radius:0;border-top:none">
     <div class="label">換算為</div>
     <div style="display:flex;gap:8px;align-items:center">
-      <select class="sel" onchange="S.tC=this.value;render()">
-        ${CL.map(c=>`<option value="${c}"${S.tC===c?' selected':''}>${c} · ${CN[c]}</option>`).join('')}
-      </select>
+      <select class="sel" onchange="S.tC=this.value;render()">${CL.map(c=>`<option value="${c}"${S.tC===c?' selected':''}>${c} · ${CN[c]}</option>`).join('')}</select>
       <div style="flex:1;font-size:24px;font-weight:700;text-align:right;padding:10px 14px;border-radius:10px;background:var(--primary-bg);color:var(--primary)">${fmt(tA,S.tC)}</div>
     </div>
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px 12px">
     <div>
       <div style="font-size:14px;color:var(--muted)">1 ${S.fC} = ${rStr} ${S.tC}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${S.rTime ? (S.rOK?'即時匯率':'備用匯率')+' · '+S.rTime : '使用備用匯率'}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${S.rTime?(S.rOK?'即時匯率':'備用匯率')+' · '+S.rTime:'使用備用匯率'}</div>
     </div>
     <button class="pill" onclick="fetchRates()" style="font-size:12px;flex-shrink:0">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      ${S.rBusy ? '更新中...' : '更新'}
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      ${S.rBusy?'更新中...':'更新'}
     </button>
   </div>
   ${npHTML('nkR')}`;
 }
+function swapC(){const r=xrate(S.fC,S.tC),fA=parseFloat(S.fA)||0,nA=fA*r;const tmp=S.fC;S.fC=S.tC;S.tC=tmp;S.fA=(S.fC==='JPY'||S.fC==='KRW')?String(Math.round(nA)):nA.toFixed(2).replace(/\.?0+$/,'')||'0';render();}
 
-function swapC() {
-  const r=xrate(S.fC,S.tC), fA=parseFloat(S.fA)||0, nA=fA*r;
-  const tmp=S.fC; S.fC=S.tC; S.tC=tmp;
-  S.fA = (S.fC==='JPY'||S.fC==='KRW') ? String(Math.round(nA)) : nA.toFixed(2).replace(/\.?0+$/,'')||'0';
-  render();
-}
-
-// ===== ACCOUNTING PAGE =====
-function accHTML() {
-  const recs = S.recs.filter(r => r.tripId === S.trip);
-
-  // Calculate totals — net spending per currency and saved per currency
-  const spending = {}, saved = {};
-  recs.forEach(r => {
-    const net = r.amt - (r.refund || 0);
-    if (net > 0) spending[r.curr] = (spending[r.curr] || 0) + net;
-    if ((r.refund || 0) > 0) saved[r.curr] = (saved[r.curr] || 0) + r.refund;
-  });
-  const spendEntries = Object.entries(spending);
-  const savedEntries = Object.entries(saved);
-
-  return `<div>
-    <!-- Trip selector -->
+function accHTML(){
+  const recs=S.recs.filter(r=>r.tripId===S.trip);
+  const spending={},saved={};
+  recs.forEach(r=>{const net=r.amt-(r.refund||0);if(net>0)spending[r.curr]=(spending[r.curr]||0)+net;if((r.refund||0)>0)saved[r.curr]=(saved[r.curr]||0)+r.refund;});
+  const curTrip=S.trips.find(t=>t.id===S.trip);
+  return`<div>
     <div class="card">
       <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
         ${S.trips.map(t=>`<button class="pill${S.trip===t.id?' on':''}" onclick="sv('trip','${t.id}')">${t.name}</button>`).join('')}
         <button class="pill" onclick="tog('showTF')" style="border-style:dashed">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          新增行程
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增行程
         </button>
       </div>
-      ${S.showTF ? `<div style="display:flex;gap:8px;margin-top:10px">
-        <input class="inp" type="text" placeholder="例：沖繩行、東京行" value="${S.nTrip}" oninput="S.nTrip=this.value" style="flex:1">
-        <button class="pbtn" style="padding:10px 16px" onclick="addTrip()">建立</button>
-      </div>` : ''}
+      ${S.showTF?`<div style="display:flex;gap:8px;margin-top:10px"><input class="inp" type="text" placeholder="例：沖繩行、東京行" value="${S.nTrip}" oninput="S.nTrip=this.value" style="flex:1"><button class="pbtn" style="padding:10px 16px" onclick="addTrip()">建立</button></div>`:''}
+      ${curTrip?`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+        <button onclick="deleteTrip('${curTrip.id}')" style="font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:5px;touch-action:manipulation">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          刪除「${curTrip.name}」行程
+        </button>
+      </div>`:''}
     </div>
 
-    <!-- Sync banner -->
-    ${S.user ? '' : `<div class="auth-banner">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--primary)">啟用跨裝置同步</div>
-        <div style="font-size:12px;color:var(--muted)">目前資料只存在本機</div>
-      </div>
-      <button class="pill" onclick="openSettings()" style="font-size:12px;flex-shrink:0">設定</button>
-    </div>`}
+    ${S.user?'':`<div class="auth-banner"><div><div style="font-size:13px;font-weight:600;color:var(--primary)">啟用跨裝置同步</div><div style="font-size:12px;color:var(--muted)">目前資料只存在本機</div></div><button class="pill" onclick="openSettings()" style="font-size:12px;flex-shrink:0">設定</button></div>`}
 
-    <!-- Summary card — only shown when there are records -->
-    ${spendEntries.length || savedEntries.length ? `<div class="card">
+    ${Object.keys(spending).length||Object.keys(saved).length?`<div class="card">
       <div class="label" style="margin-bottom:10px">本次旅行統計</div>
-      ${spendEntries.map(([c,v]) => `
-        <div class="stat-row">
-          <span class="stat-label">本次花費（${c}）</span>
-          <span class="stat-val">${fmt(v,c)}</span>
-        </div>`).join('')}
-      ${savedEntries.map(([c,v]) => `
-        <div class="stat-row" style="margin-top:2px">
-          <span style="font-size:13px;color:var(--success-text)">🎉 退稅省下（${c}）</span>
-          <span class="stat-val saved">${fmt(v,c)}</span>
-        </div>`).join('')}
-    </div>` : ''}
+      ${Object.entries(spending).map(([c,v])=>`<div class="row"><span class="muted" style="font-size:14px">實際花費（${c}）</span><span style="font-weight:700;font-size:16px">${fmt(v,c)}</span></div>`).join('')}
+      ${Object.entries(saved).map(([c,v])=>`<div class="row"><span style="font-size:14px;color:var(--success-text)">🎉 退稅省下（${c}）</span><span style="font-weight:700;font-size:16px;color:var(--success-text)">${fmt(v,c)}</span></div>`).join('')}
+    </div>`:''}
 
-    <!-- Add record button -->
     <button class="pbtn" style="width:100%;margin-bottom:12px" onclick="tog('showF')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px;margin-right:6px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      新增消費
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px;margin-right:6px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增消費
     </button>
+    ${S.showF?accFormHTML():''}
 
-    ${S.showF ? accFormHTML() : ''}
-
-    <!-- Records header with collapse toggle -->
     <div class="recs-header" onclick="tog('recsOpen')">
       <span style="font-weight:600;font-size:14px">消費紀錄（${recs.length}）</span>
       <div style="display:flex;align-items:center;gap:4px;color:var(--muted);font-size:13px">
-        ${S.recsOpen ? '收起' : '展開'}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(${S.recsOpen?'180':'0'}deg);transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
+        ${S.recsOpen?'收起':'展開'}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="transform:rotate(${S.recsOpen?180:0}deg);transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
     </div>
-
-    ${S.recsOpen ? (recs.length ? recs.map(r => {
-      const net = r.amt - (r.refund || 0);
-      const hasRefund = (r.refund || 0) > 0;
-      return `<div class="ri">
+    ${S.recsOpen?(recs.length?recs.map(r=>{
+      const net=r.amt-(r.refund||0);
+      const hasRef=(r.refund||0)>0;
+      return`<div class="ri">
         <div class="ric">${catSvg(r.cat)}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name || catL(r.cat)}</div>
+          <div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name||catL(r.cat)}</div>
           <div class="muted" style="font-size:12px">${catL(r.cat)} · ${r.date}</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          ${hasRefund
-            ? `<div style="font-weight:600">${fmt(net, r.curr)}</div>
-               <div style="font-size:11px;color:var(--success-text)">省 ${fmt(r.refund, r.curr)} ${r.curr}</div>`
-            : `<div style="font-weight:600">${fmt(r.amt, r.curr)}</div>
-               <div class="muted" style="font-size:12px">${r.curr}</div>`}
+          ${hasRef?`<div style="font-weight:600">${fmt(net,r.curr)}</div><div style="font-size:11px;color:var(--success-text)">省 ${fmt(r.refund,r.curr)} ${r.curr}</div>`:`<div style="font-weight:600">${fmt(r.amt,r.curr)}</div><div class="muted" style="font-size:12px">${r.curr}</div>`}
         </div>
-        <button class="ibtn" onclick="rmRec('${r.id}')" aria-label="刪除">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="ibtn" onclick="rmRec('${r.id}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>`;
-    }).join('') : `<div class="empty">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <div>還沒有記帳記錄</div>
-    </div>`) : `<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:13px">（已收起 ${recs.length} 筆記錄）</div>`}
+    }).join(''):`<div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><div>還沒有記帳記錄</div></div>`)
+    :`<div style="text-align:center;padding:14px;color:var(--muted);font-size:13px">已收起 ${recs.length} 筆記錄</div>`}
   </div>`;
 }
 
-function accFormHTML() {
-  return `<div class="card" style="border-color:var(--primary);margin-bottom:12px">
+function calcRefund(amt){const a=parseFloat(amt)||0;const u=a/1.1;if(u<5000)return 0;const tax=a*0.1/1.1;const fee=tax*(parseFloat(S.feeR)||0)/100;return Math.round(tax-fee);}
+function toggleRefund(){S.f.hasRefund=!S.f.hasRefund;if(S.f.hasRefund)S.f.refundAmt=String(calcRefund(S.f.amt));render();}
+
+function accFormHTML(){
+  const net=(parseFloat(S.f.amt)||0)-(parseFloat(S.f.refundAmt)||0);
+  return`<div class="card" style="border-color:var(--primary);margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <span style="font-weight:700;font-size:15px">新增消費</span>
-      <button class="ibtn" onclick="tog('showF')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <button class="ibtn" onclick="tog('showF')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="label">消費日期</div>
     <input class="inp" type="date" value="${S.f.date}" onchange="S.f.date=this.value" style="margin-bottom:12px">
     <div class="label">類別</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
-      ${CATS.map(c=>`<button class="pill${S.f.cat===c.id?' on':''}" onclick="S.f.cat='${c.id}';render()" style="font-size:12px;padding:5px 11px">${c.l}</button>`).join('')}
-    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${CATS.map(c=>`<button class="pill${S.f.cat===c.id?' on':''}" onclick="S.f.cat='${c.id}';render()" style="font-size:12px;padding:5px 11px">${c.l}</button>`).join('')}</div>
     <div class="label">商品 / 說明（選填）</div>
     <input class="inp" type="text" placeholder="例：吉野家牛丼" value="${S.f.name}" oninput="S.f.name=this.value" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <span class="label" style="margin:0">金額</span>
-      <select class="sel" onchange="S.f.curr=this.value;render()" style="font-size:13px;padding:5px 8px">
-        ${[...CL.slice(1),'TWD'].map(c=>`<option value="${c}"${S.f.curr===c?' selected':''}>${c} ${CN[c]}</option>`).join('')}
-      </select>
+      <select class="sel" onchange="S.f.curr=this.value;render()" style="font-size:13px;padding:5px 8px">${[...CL.slice(1),'TWD'].map(c=>`<option value="${c}"${S.f.curr===c?' selected':''}>${c} ${CN[c]}</option>`).join('')}</select>
     </div>
     <div class="amt-box" style="margin-bottom:8px">
       <span class="muted" style="font-size:12px">${S.f.curr}</span>
       <span style="font-size:30px;font-weight:700;letter-spacing:-1px">${parseFloat(S.f.amt||0).toLocaleString('zh-TW')}</span>
     </div>
     ${npHTML('nkF')}
-    <div class="two" style="margin-top:4px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 ${S.f.hasRefund?'0':'4px'}">
+      <div>
+        <div style="font-size:14px">已申請退稅</div>
+        <div class="muted" style="font-size:11px">自動以 10% 扣手續費試算</div>
+      </div>
+      <button class="tgl${S.f.hasRefund?' on':''}" onclick="toggleRefund()"></button>
+    </div>
+    ${S.f.hasRefund?`<div class="refund-box">
+      <div class="label" style="margin-bottom:6px">退稅金額（可修改）</div>
+      <input class="inp" type="number" value="${S.f.refundAmt}" oninput="S.f.refundAmt=this.value" placeholder="0" style="margin-bottom:8px">
+      <div class="row" style="padding:3px 0"><span style="font-size:13px;color:var(--success-text)">實際花費</span><span style="font-weight:700;color:var(--success-text)">${fmt(net>0?net:0,S.f.curr)} ${S.f.curr}</span></div>
+    </div>`:''}
+    <div class="two" style="margin-top:12px">
       <button class="pbtn" style="flex:1" onclick="addRec()">儲存</button>
       <button class="gbtn" onclick="tog('showF')">取消</button>
-      <button class="gbtn" onclick="clearAmt()" title="清空金額">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
-        清空
+      <button class="gbtn" onclick="clearAmt()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:3px"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>清空
       </button>
     </div>
   </div>`;
 }
 
-// ===== EVENT HANDLERS =====
-function sv(k,v) { S[k]=v; render(); }
-function tog(k)  { S[k]=!S[k]; render(); }
-function clearAmt() { S.f.amt = '0'; render(); }
+function sv(k,v){S[k]=v;render();}
+function tog(k){S[k]=!S[k];render();}
+function clearAmt(){S.f.amt='0';S.f.refundAmt='0';render();}
 
-function addTrip() {
-  const name = S.nTrip.trim();
-  if (!name) return;
-  // Prevent duplicate trip names
-  if (S.trips.some(t => t.name === name)) {
-    alert('已有相同名稱的行程，請使用不同名稱');
-    return;
-  }
-  const trip = { id:uid(), name };
+function addTrip(){
+  const name=S.nTrip.trim();if(!name)return;
+  if(S.trips.some(t=>t.name===name)){alert('已有相同名稱的行程，請使用不同名稱');return;}
+  const trip={id:uid(),name};
   fsAddTrip(trip);
-  S.trip = trip.id; S.nTrip = ''; S.showTF = false;
+  S.trip=trip.id;S.nTrip='';S.showTF=false;render();
+}
+function deleteTrip(id){
+  const trip=S.trips.find(t=>t.id===id);if(!trip)return;
+  const count=S.recs.filter(r=>r.tripId===id).length;
+  const msg=count>0?`確定要刪除「${trip.name}」？\n此行程有 ${count} 筆記錄，刪除後無法復原。`:`確定要刪除「${trip.name}」？`;
+  if(!confirm(msg))return;
+  const ids=S.recs.filter(r=>r.tripId===id).map(r=>r.id);
+  S.recs=S.recs.filter(r=>r.tripId!==id);
+  if(S.user&&db)ids.forEach(rid=>db.collection(`users/${S.user.uid}/records`).doc(rid).delete());
+  S.trips=S.trips.filter(t=>t.id!==id);
+  if(S.user&&db)db.collection(`users/${S.user.uid}/trips`).doc(id).delete();
+  else saveLocal();
+  if(S.trip===id)S.trip=S.trips[0]?.id||null;
   render();
 }
+function addRec(){
+  const f=S.f,a=parseFloat(f.amt);if(!a)return;
+  const refund=f.hasRefund?(parseFloat(f.refundAmt)||0):0;
+  fsAddRecord({id:uid(),tripId:S.trip,date:f.date,cat:f.cat,name:f.name.trim(),amt:a,refund,curr:f.curr});
+  S.f={date:today(),cat:'shop',name:'',amt:'0',curr:'JPY',hasRefund:false,refundAmt:'0'};
+  S.showF=false;render();
+}
+function rmRec(id){fsDeleteRecord(id);render();}
 
-function addRec() {
-  const f = S.f, a = parseFloat(f.amt);
-  if (!a) return; // name is optional
-  const rec = {
-    id: uid(), tripId: S.trip, date: f.date, cat: f.cat,
-    name: f.name.trim(), amt: a, refund: 0, curr: f.curr
-  };
-  fsAddRecord(rec);
-  S.f = { date:today(), cat:'shop', name:'', amt:'0', curr:'JPY' };
-  S.showF = false;
-  render();
+function openDrawer(){
+  document.querySelectorAll('.dnav').forEach(b=>b.classList.remove('on'));
+  const id=S.tab==='acc'?'di-acc':(S.tm==='rate'?'di-rate':'di-tax');
+  document.getElementById(id)?.classList.add('on');
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').style.display='block';
 }
-
-function rmRec(id) {
-  fsDeleteRecord(id);
-  render();
-}
-
-// ===== SETTINGS =====
-function openSettings() {
-  const cfg = lsGet('fb_config', FIREBASE_CONFIG);
-  document.getElementById('fb-apiKey').value      = cfg.apiKey || '';
-  document.getElementById('fb-authDomain').value  = cfg.authDomain || '';
-  document.getElementById('fb-projectId').value   = cfg.projectId || '';
-  document.getElementById('fb-appId').value       = cfg.appId || '';
-  updateFbStatus();
-  updateAuthSection();
-  updateThemeButtons();
-  document.getElementById('settings-overlay').style.display = 'flex';
-}
-function closeSettings() {
-  document.getElementById('settings-overlay').style.display = 'none';
-}
-function updateFbStatus() {
-  const el = document.getElementById('firebase-status');
-  if (S.fbReady) {
-    el.innerHTML = `<div style="background:var(--success-bg);color:var(--success-text);border-radius:8px;padding:8px 12px;font-size:13px">✓ Firebase 已連線</div>`;
-  } else if (lsGet('fb_config',null)?.apiKey) {
-    el.innerHTML = `<div style="background:var(--danger-bg);color:var(--danger);border-radius:8px;padding:8px 12px;font-size:13px">⚠ Firebase 設定有誤或尚未初始化</div>`;
-  } else {
-    el.innerHTML = '';
-  }
-}
-function updateAuthSection() {
-  const sec = document.getElementById('auth-section');
-  const content = document.getElementById('auth-content');
-  if (!S.fbReady) { sec.style.display='none'; return; }
-  sec.style.display = 'block';
-  if (S.authLoading) { content.innerHTML='<div class="muted" style="font-size:13px">載入中...</div>'; return; }
-  if (S.user) {
-    content.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:13px;font-weight:600">${S.user.displayName||'使用者'}</div>
-        <div class="muted" style="font-size:12px">${S.user.email}</div>
-      </div>
-      <button class="gbtn" style="font-size:13px;padding:8px 14px" onclick="signOut()">登出</button>
-    </div>`;
-  } else {
-    content.innerHTML=`<div>
-      <div class="muted" style="font-size:13px;margin-bottom:10px">登入以啟用跨裝置同步</div>
-      <button class="pbtn" style="width:100%" onclick="signIn()">用 Google 帳號登入</button>
-    </div>`;
-  }
-}
-function saveFbConfig() {
-  const cfg = {
-    apiKey:      document.getElementById('fb-apiKey').value.trim(),
-    authDomain:  document.getElementById('fb-authDomain').value.trim(),
-    projectId:   document.getElementById('fb-projectId').value.trim(),
-    appId:       document.getElementById('fb-appId').value.trim(),
-    storageBucket: document.getElementById('fb-authDomain').value.replace('firebaseapp.com','appspot.com'),
-    messagingSenderId: '',
-  };
-  lsSet('fb_config', cfg);
-  alert('設定已儲存，將重新載入 App');
-  location.reload();
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').style.display='none';}
+function navTo(dest){
+  if(dest==='tax'){S.tab='tools';S.tm='tax';}
+  else if(dest==='rate'){S.tab='tools';S.tm='rate';}
+  else if(dest==='acc'){S.tab='acc';}
+  closeDrawer();render();
 }
 
-// Use redirect-based sign-in — more reliable on mobile PWA than popup
-function signIn() {
-  if (!auth) return;
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+function openSettings(){
+  const cfg=lsGet('fb_config',FIREBASE_CONFIG);
+  document.getElementById('fb-apiKey').value=cfg.apiKey||'';
+  document.getElementById('fb-authDomain').value=cfg.authDomain||'';
+  document.getElementById('fb-projectId').value=cfg.projectId||'';
+  document.getElementById('fb-appId').value=cfg.appId||'';
+  updateFbStatus();updateAuthSection();updateThemeButtons();
+  document.getElementById('settings-overlay').style.display='flex';
 }
-function signOut() {
-  auth?.signOut();
-  S.user = null;
-  loadLocal(); render(); updateAuthSection();
+function closeSettings(){document.getElementById('settings-overlay').style.display='none';}
+function updateFbStatus(){
+  const el=document.getElementById('firebase-status');
+  if(S.fbReady)el.innerHTML=`<div style="background:var(--success-bg);color:var(--success-text);border-radius:8px;padding:8px 12px;font-size:13px">✓ Firebase 已連線</div>`;
+  else if(lsGet('fb_config',null)?.apiKey)el.innerHTML=`<div style="background:var(--danger-bg);color:var(--danger);border-radius:8px;padding:8px 12px;font-size:13px">⚠ 設定有誤或尚未初始化</div>`;
+  else el.innerHTML='';
 }
+function updateAuthSection(){
+  const sec=document.getElementById('auth-section'),content=document.getElementById('auth-content');
+  if(!S.fbReady){sec.style.display='none';return;}
+  sec.style.display='block';
+  if(S.authLoading){content.innerHTML='<div class="muted" style="font-size:13px">載入中...</div>';return;}
+  content.innerHTML=S.user
+    ?`<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:600">${S.user.displayName||'使用者'}</div><div class="muted" style="font-size:12px">${S.user.email}</div></div><button class="gbtn" style="font-size:13px;padding:8px 14px" onclick="signOut()">登出</button></div>`
+    :`<div><div class="muted" style="font-size:13px;margin-bottom:10px">登入以啟用跨裝置同步</div><button class="pbtn" style="width:100%" onclick="signIn()">用 Google 帳號登入</button></div>`;
+}
+function saveFbConfig(){
+  const cfg={apiKey:document.getElementById('fb-apiKey').value.trim(),authDomain:document.getElementById('fb-authDomain').value.trim(),projectId:document.getElementById('fb-projectId').value.trim(),appId:document.getElementById('fb-appId').value.trim(),storageBucket:document.getElementById('fb-authDomain').value.replace('firebaseapp.com','appspot.com'),messagingSenderId:''};
+  lsSet('fb_config',cfg);alert('設定已儲存，將重新載入 App');location.reload();
+}
+function signIn(){if(!auth)return;auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());}
+function signOut(){auth?.signOut();S.user=null;loadLocal();render();updateAuthSection();}
 
-// ===== THEME =====
-function setTheme(t) {
-  lsSet('theme', t);
-  applyTheme(t);
-  updateThemeButtons();
-}
-function applyTheme(t) {
-  if (t==='dark')  document.documentElement.setAttribute('data-theme','dark');
-  else if (t==='light') document.documentElement.setAttribute('data-theme','light');
-  else document.documentElement.removeAttribute('data-theme');
-}
-function updateThemeButtons() {
-  const t = lsGet('theme','system');
-  ['light','dark','sys'].forEach(k => {
-    const el = document.getElementById('theme-'+k);
-    if (el) el.classList.toggle('on', (k==='sys'?'system':k)===t);
-  });
-}
+function setTheme(t){lsSet('theme',t);applyTheme(t);updateThemeButtons();}
+function applyTheme(t){if(t==='dark')document.documentElement.setAttribute('data-theme','dark');else if(t==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.removeAttribute('data-theme');}
+function updateThemeButtons(){const t=lsGet('theme','system');['light','dark','sys'].forEach(k=>{const el=document.getElementById('theme-'+k);if(el)el.classList.toggle('on',(k==='sys'?'system':k)===t);});}
 
-// ===== INIT =====
-(function init() {
+(function init(){
   applyTheme(lsGet('theme','system'));
-
-  const cached = lsGet('rates_cache', null);
-  if (cached && Date.now() - cached.ts < 3600000) {
-    S.rates = cached.data; S.rOK = true; S.rTime = cached.time;
-  }
-
+  const c=lsGet('rates_cache',null);
+  if(c&&Date.now()-c.ts<3600000){S.rates=c.data;S.rOK=true;S.rTime=c.time;}
   tryInitFirebase();
-  if (!S.fbReady) { loadLocal(); render(); }
+  if(!S.fbReady){loadLocal();render();}
   fetchRates();
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  }
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script>
 </body>
