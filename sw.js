@@ -1,5 +1,5 @@
-const CACHE = 'travel-app-v1';
-const SHELL = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'travel-app-v2';
+const SHELL = ['./manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
@@ -16,8 +16,27 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // 匯率 API 不走 cache，永遠嘗試網路
-  if (e.request.url.includes('open.er-api.com')) return;
+  const url = e.request.url;
+
+  // 匯率 API 永遠走網路
+  if (url.includes('open.er-api.com')) return;
+
+  // index.html：network-first，確保每次都拿最新版
+  // 有網路就用新的，無網路才 fallback 到快取
+  if (url.endsWith('/') || url.includes('index.html') || e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+          return res;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // 其他靜態資源（icons、manifest）：cache-first，這些幾乎不變
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
